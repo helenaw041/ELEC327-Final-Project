@@ -106,12 +106,16 @@ static inline uint32_t degrees_to_ticks(float deg)
  */
 static void recalculate_ccr_table(void)
 {
+
     uint32_t duty_ticks = (TICKS_PER_PERIOD * (uint32_t)g_duty_pct) / 100U;
 
     for (uint32_t ch = 0; ch < NUM_CH; ch++)
     {
         uint32_t rise = degrees_to_ticks(g_phase_deg[ch]);
         uint32_t fall = (rise + duty_ticks) % TICKS_PER_PERIOD;
+
+        if (rise == 0U) rise = 1U;
+        if (fall == 0U) fall = 1U;
 
         g_ccr_table[ch]          = rise;
         g_ccr_table[ch + NUM_CH] = fall;
@@ -350,12 +354,17 @@ void TIMA0_IRQHandler(void)
     if (isr & GPTIMER_CPU_INT_MIS_Z_SET)
     {
         /* Start of new period: switch CCACT to HIGH, trigger rise DMA */
-        TIMA0->COUNTERREGS.CCACT_01[0] =
-            (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) |
-            (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
-        TIMA0->COUNTERREGS.CCACT_23[0] =
-            (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) |
-            (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        // TIMA0->COUNTERREGS.CCACT_01[0] =
+        //     (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) |
+        //     (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        // TIMA0->COUNTERREGS.CCACT_23[0] =
+        //     (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) |
+        //     (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        
+        TIMA0->COUNTERREGS.CCACT_01[0] = (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_01[1] = (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_23[0] = (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_23[1] = (CCACT_CUACT_HIGH << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_HIGH << CCACT_CC1_CUACT_OFS);
 
         /* Software-trigger DMA CH0 and CH1 (rise ticks -> CC_01, CC_23) */
         DMA->DMATRIG[0].DMATCTL = DMA_SOFTWARE_TRIG;
@@ -367,12 +376,17 @@ void TIMA0_IRQHandler(void)
     if (isr & GPTIMER_CPU_INT_MIS_CCU0_SET)
     {
         /* CH0 just went HIGH: switch CCACT to LOW, trigger fall DMA */
-        TIMA0->COUNTERREGS.CCACT_01[0] =
-            (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) |
-            (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
-        TIMA0->COUNTERREGS.CCACT_23[0] =
-            (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) |
-            (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+        // TIMA0->COUNTERREGS.CCACT_01[0] =
+        //     (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) |
+        //     (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+        // TIMA0->COUNTERREGS.CCACT_23[0] =
+        //     (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) |
+        //     (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+
+        TIMA0->COUNTERREGS.CCACT_01[0] = (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_01[1] = (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_23[0] = (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
+        TIMA0->COUNTERREGS.CCACT_23[1] = (CCACT_CUACT_LOW << CCACT_CC0_CUACT_OFS) | (CCACT_CUACT_LOW << CCACT_CC1_CUACT_OFS);
 
         /* Software-trigger DMA CH2 and CH3 (fall ticks -> CC_01, CC_23) */
         DMA->DMATRIG[2].DMATCTL = DMA_SOFTWARE_TRIG;
