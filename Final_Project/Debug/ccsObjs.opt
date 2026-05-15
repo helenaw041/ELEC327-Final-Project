@@ -1,0 +1,5 @@
+"./delay.o"
+"./phased_pwm.o"
+"./startup_mspm0g350x_ticlang.o"
+"../mspm0g3507.cmd"
+-l"/Users/katefiles/ti/mspm0_sdk_2_09_00_01/source/ti/driverlib/lib/ticlang/m0p/mspm0g1x0x_g3x0x/driverlib.a"
