@@ -6,3 +6,6 @@ On MSPM0, using DMA.
 MSP code in 'Final Project' Folder
 Board in .zip, and post-fab image in Board.jpg
 Refer to 'Writeup.pdf' for more information.
+
+### Future Work
+Fully debugged up until transducer output. Output was very quiet--transducer footprint is larger than the wavelength of the 40kHz (causing aperture smearing) and did not allow for enough constructive interference and tuning of phases to amplify audio. 
